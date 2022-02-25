@@ -35,6 +35,9 @@ namespace Calway.Configuration
             }
         }
 
+        /// <summary>
+        /// Indicates whether a configuration setting can be changed/updated 
+        /// </summary>
         protected bool UpdateAllowed
         {
             get;
