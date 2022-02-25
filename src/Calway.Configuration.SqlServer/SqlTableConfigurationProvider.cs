@@ -148,6 +148,11 @@ namespace Calway.Configuration
             return result;
         }
 
+        /// <summary>
+        /// Splits the key into a section part and a key part when the key contais the keydelimiter ':'
+        /// </summary>
+        /// <param name="key"></param>
+        /// <returns></returns>
         protected (string,string) GetSectionAndKeyName(string key)
         {
             string keyName = key;
