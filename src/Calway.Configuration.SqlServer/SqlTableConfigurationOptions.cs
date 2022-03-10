@@ -25,6 +25,15 @@ namespace Calway.Configuration
         } = false;
 
         /// <summary>
+        /// When True the updated setting is automatically created/added when it does not exist
+        /// </summary>
+        public bool AutoCreateKey
+        {
+            get;
+            set;
+        } = true;
+
+        /// <summary>
         /// The connection string, when not specified the ConnectionStringName is used
         /// </summary>
         public string ConnectionString

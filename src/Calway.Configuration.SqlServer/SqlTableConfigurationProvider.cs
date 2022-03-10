@@ -16,6 +16,7 @@ namespace Calway.Configuration
         public SqlTableConfigurationProvider(SqlTableConfigurationOptions options)
         {
             this.UpdateAllowed = options.UpdateAllowed;
+            this.AutoCreateKey = options.AutoCreateKey;
             this.ConnectionString = options.ConnectionString;
             this.CacheDuration = options.CacheDuration;
             this.TableName = options.TableName;
@@ -39,6 +40,16 @@ namespace Calway.Configuration
         /// Indicates whether a configuration setting can be changed/updated 
         /// </summary>
         protected bool UpdateAllowed
+        {
+            get;
+            set;
+        } = false;
+
+
+        /// <summary>
+        /// When True the updated setting is automatically created/added when it does not exist
+        /// </summary>
+        protected bool AutoCreateKey
         {
             get;
             set;
@@ -78,16 +89,38 @@ namespace Calway.Configuration
                 throw new Exception("Update not allowed");
             }
 
-            key = key.ToLower();
+            string lowerKey = key.ToLower();
 
-            (string section, string keyName) = GetSectionAndKeyName(key);
+            (string section, string keyName) = GetSectionAndKeyName(lowerKey);
 
             if (this.updateValue(section, keyName, value))
             {
                 lock (this.syncRoot)
                 {
-                    base.Set(key, value);
-                    this.CacheData[key] = DateTime.Now;
+                    base.Set(lowerKey, value);
+                    this.CacheData[lowerKey] = DateTime.Now;
+                }
+            } else
+            {
+                bool keyExists = false;
+
+                lock (this.syncRoot)
+                {
+                    keyExists = this.Data.ContainsKey(lowerKey);
+                }
+
+                if ((!keyExists) && (this.AutoCreateKey))
+                {
+                    (section, keyName) = GetSectionAndKeyName(key);
+
+                    if (this.createKey(section, keyName, value))
+                    {
+                        lock (this.syncRoot)
+                        {
+                            this.Data.Add(lowerKey, value);
+                            this.CacheData.Add(lowerKey,DateTime.Now);
+                        }                            
+                    }
                 }
             }
         }
@@ -128,6 +161,30 @@ namespace Calway.Configuration
             return result;
         }
 
+        private bool createKey(string section, string keyName, string value)
+        {
+            bool result = false;
+
+            using (var connection = this.CreateConnection())
+            {
+                DbCommand command = connection.CreateCommand();
+                command.CommandText = $"INSERT {TableName}({ColumnNameSection},{ColumnNameKey},{ColumnNameValue}) VALUES(@SECTION,@KEY,@VALUE)";
+
+                command.Parameters.Add(new SqlParameter("SECTION", section));
+                command.Parameters.Add(new SqlParameter("KEY", keyName));
+                command.Parameters.Add(new SqlParameter("VALUE", value));
+
+                connection.Open();
+
+                int affectedRows = command.ExecuteNonQuery();
+
+                result = (affectedRows > 0);
+            }
+
+            return result;
+        }
+
+
         private bool updateValue(string section, string keyName, string value)
         {
             bool result = false;
@@ -139,13 +196,13 @@ namespace Calway.Configuration
 
                 command.Parameters.Add(new SqlParameter("SECTION", section));
                 command.Parameters.Add(new SqlParameter("KEY", keyName));
-                command.Parameters.Add(new SqlParameter("VALUE", value));
+                command.Parameters.Add(new SqlParameter("VALUE", (value == null ? (object)DBNull.Value : value)));
 
                 connection.Open();
 
-                command.ExecuteNonQuery();
+                int affectedRows = command.ExecuteNonQuery();
 
-                result = true;
+                result = (affectedRows > 0);
             }
 
             return result;
@@ -271,15 +328,21 @@ namespace Calway.Configuration
 
                     while (reader.Read())
                     {
-                        // to do: check DBNull.Value;
-
                         string section = reader[ColumnNameSection].ToString().Trim();
                         string key = reader[ColumnNameKey].ToString().Trim();
-                        string value = reader[ColumnNameValue].ToString().Trim();
+
+                        object value = reader[ColumnNameValue];
+
+                        string str = null;
+                        
+                        if (value != DBNull.Value)
+                        {
+                            str = value.ToString().Trim();
+                        }                        
 
                         string keyPath = (section + ConfigurationPath.KeyDelimiter + key).ToLower();
 
-                        this.Data.Add(keyPath, value);
+                        this.Data.Add(keyPath, str);
                         this.CacheData.Add(keyPath, DateTime.Now);
                     }
                 }

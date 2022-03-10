@@ -34,4 +34,16 @@ namespace Calway.Configuration
         }
     }
 
+    //public T Get<T>(this IConfiguration configuration, string key)
+    //{
+    //    if (typeof(T) == typeof(bool))
+    //    {
+    //        string value = configuration.GetValue<string>(key);
+          
+    //    } 
+               
+
+    //    return;
+    //}
+
 }
