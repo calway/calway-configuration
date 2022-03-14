@@ -35,7 +35,7 @@ steps:
     command: 'restore'
     restoreSolution: '$(solution)'
     feedsToUse: 'select'
-    vstsFeed: '$(DevOps.ArtifactFeed)'
+    vstsFeed: '9ae8335d-99f5-446e-915c-bd6367ac6470'
 
 # There is a difference between DotNetCoreCLI and VSBuild where VSBuild generates
 # a nupkg "Calway.Configuration" and NuGetCOmmand generates a "Calway.Configuration.SqlServer"
