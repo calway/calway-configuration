@@ -1,0 +1,76 @@
+﻿#
+# DevOps release pipeline to build and publish a new nuget to an internal DevOps artifact feed
+# We are leaving some test code in because of ...reasons...
+#
+# Variables: DevOps.ArtifactFeed - The guid of the artifact feed we want to publish to 
+# Requirements: We are running on an internal BUILD-AGENT because building in the cloud is sloooowwwwww
+#
+
+# We trigger on a new "release-" tagged commit. A benefit of this is that we can guarantee the minver versionnumber works
+trigger:
+  branches:
+    include:
+    - 'refs/tags/release-*'
+# for some repos we might also restrict on commits inside a path
+#  paths:
+#    include:
+#    - 'calway-configuration'
+
+variables:
+  solution: 'calway-configuration.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+pool:
+  name: 'Default'
+  demands: 
+  - Agent.Name -equals BUILD-AGENT
+
+steps:
+- task: NuGetToolInstaller@1
+
+- task: NuGetCommand@2
+  displayName: Restore all packages in the solution
+  inputs:
+    command: 'restore'
+    restoreSolution: '$(solution)'
+    feedsToUse: 'select'
+    vstsFeed: '$(DevOps.ArtifactFeed)'
+
+# There is a difference between DotNetCoreCLI and VSBuild where VSBuild generates
+# a nupkg "Calway.Configuration" and NuGetCOmmand generates a "Calway.Configuration.SqlServer"
+#
+# So instead of this we use VSBuild@1 instead
+#- task: DotNetCoreCLI@2
+#  displayName: Build the solution
+#  inputs:
+#    command: 'build'
+#    projects: '**/*.csproj'
+
+#- task: NuGetCommand@2
+#  displayName: Create the nuget package
+#  inputs:
+#    command: 'pack'
+#    packagesToPack: '**/*.csproj'
+#    versioningScheme: 'off'
+
+
+# Silly thing is this also tries to restores packages and --no-restore did not work as argument
+- task: VSBuild@1
+  displayName: Build the solution
+  inputs:
+    solution: '$(solution)'    
+    platform: '$(buildPlatform)'
+    configuration: '$(buildConfiguration)'
+
+# Again DotNetCoreCLI did not seem to work here, but NuGetCommand did ?
+#- task: DotNetCoreCLI@2
+- task: NuGetCommand@2
+  displayName: Push the nuget package to the internal feed 'Calway'
+  inputs:
+    command: 'push'
+    packagesToPush: '$(Build.Repository.LocalPath)/**/*.nupkg'
+# VSBuild seems to put thing in LocalPath and DotNetCoreCLI in Artifact... ?
+#    packagesToPush: '$(Build.ArtifactStagingDirectory)/**/*.nupkg'
+    nuGetFeedType: 'internal'
+    publishVstsFeed: '$(DevOps.ArtifactFeed)'
