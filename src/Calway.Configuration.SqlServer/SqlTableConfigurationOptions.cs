@@ -69,6 +69,10 @@ namespace Calway.Configuration
             set;
         } = "CONFIG";
 
+
+        /// <summary>
+        /// The name of the section column
+        /// </summary>
         public string ColumnNameSection
         {
             get;

@@ -24,6 +24,10 @@
 		<MinVerTagPrefix>release-</MinVerTagPrefix>
 		<MinVerDefaultPreReleasePhase>pre</MinVerDefaultPreReleasePhase>
 	</PropertyGroup>
+	
+	<PropertyGroup>
+		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<None Include="..\..\README.md">

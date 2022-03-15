@@ -10,7 +10,7 @@ namespace Calway.Configuration
         {            
             SqlTableConfigurationOptions options = new SqlTableConfigurationOptions();
             options.ConnectionStringName = connectionStringName;
-
+            
             SqlTableConfigurationProviderUtils.InitializeOptions(builder, options);
 
             builder.AddSqlServerTableConfiguration(options);
@@ -32,6 +32,19 @@ namespace Calway.Configuration
 
             SqlTableConfigurationProviderUtils.AddConfigSource(builder, configSource,options);
         }
+
+        static public SqlTableConfigurationProvider GetSqlTableProvider(this IConfigurationRoot configuration)
+        {
+            foreach (IConfigurationProvider provider in configuration.Providers)
+            {
+                if (provider is SqlTableConfigurationProvider sqlTableProvider)
+                {
+                    return sqlTableProvider;                    
+                }
+            }
+
+            return null;
+        }
     }
 
     //public T Get<T>(this IConfiguration configuration, string key)
@@ -39,9 +52,9 @@ namespace Calway.Configuration
     //    if (typeof(T) == typeof(bool))
     //    {
     //        string value = configuration.GetValue<string>(key);
-          
+
     //    } 
-               
+
 
     //    return;
     //}
