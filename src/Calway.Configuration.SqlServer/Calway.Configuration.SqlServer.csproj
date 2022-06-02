@@ -27,6 +27,8 @@
 	
 	<PropertyGroup>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
+		<SignAssembly>True</SignAssembly>
+		<AssemblyOriginatorKeyFile>Calway.Configuration.SqlServer.snk</AssemblyOriginatorKeyFile>
 	</PropertyGroup>
 
 	<ItemGroup>
