@@ -76,7 +76,9 @@ namespace Calway.Configuration
             set;
         } = -1;
 
-
+        /// <summary>
+        /// The abstract databse factory
+        /// </summary>
         abstract protected DbProviderFactory Factory
         {
             get;            
