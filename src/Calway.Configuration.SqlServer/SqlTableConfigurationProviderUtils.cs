@@ -13,6 +13,12 @@ namespace Calway.Configuration
             }
         }
 
+        /// <summary>
+        /// Inserts the configsource as first or last to the configuration builder
+        /// </summary>
+        /// <param name="builder"></param>
+        /// <param name="configSource"></param>
+        /// <param name="options"></param>
         public static void AddConfigSource(IConfigurationBuilder builder,IConfigurationSource configSource, SqlTableConfigurationOptions options)
         {
 
