@@ -17,8 +17,15 @@
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
 		<IsPublishable>False</IsPublishable>
+		<!-- DISABLE Symbols so the pipline will build. Our DevOps pipeline erros with:
+		
+		Error NU5039: The readme file 'README.md' does not exist in the package.
+		
+		when: Attempting to build symbols package for 'Calway.Configuration.SqlServer.csproj'.
+		
 		<IncludeSymbols>true</IncludeSymbols>
 		<SymbolPackageFormat>snupkg</SymbolPackageFormat>
+		-->	
 	</PropertyGroup>
 	<PropertyGroup>
 		<MinVerTagPrefix>release-</MinVerTagPrefix>
