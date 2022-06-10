@@ -77,7 +77,7 @@ namespace Calway.Configuration
         } = -1;
 
         /// <summary>
-        /// The abstract databse factory
+        /// The abstract database factory
         /// </summary>
         abstract protected DbProviderFactory Factory
         {
